@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+#set -x
+
+while getopts g:i:p: flag
+do
+    case "${flag}" in
+        g) group=${OPTARG};;
+        i) instance=${OPTARG};;
+        p) port=${OPTARG};;
+    esac
+done
+
+if [ -z "$group" ]; then
+    group=eng
+fi
+
+if [ -z "$instance" ]; then
+    echo "Usage: $0 -i <instance_name> [-g <group>] [-p <port>]"
+    echo " "
+    echo "Example: $0 -i aserto-eng"
+    exit 1
+fi
+
+if [ -z "$port" ]; then
+    port=5432
+fi
+
+az ad signed-in-user show || az login
+az account set --subscription 98a125e8-3299-4692-9ad0-4258855d94ee
+az ssh vm -n ${group}-proxy -g ${group} -- -L ${port}:${instance}.postgres.database.azure.com:5432 "echo 'Forwarding localhost:${port} -> ${instance}.postgres.database.azure.com:5432'  && sleep 86400"
