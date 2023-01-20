@@ -29,4 +29,4 @@ fi
 
 az ad signed-in-user show || az login
 az account set --subscription 98a125e8-3299-4692-9ad0-4258855d94ee
-az ssh vm -n ${group}-proxy -g ${group} -- -L ${port}:${instance}.postgres.database.azure.com:5432 "echo 'Forwarding localhost:${port} -> ${instance}.postgres.database.azure.com:5432'  && sleep 86400"
+az ssh vm --port 2222 -n ${group}-proxy -g ${group} -- -L ${port}:${instance}.postgres.database.azure.com:5432 "echo 'Forwarding localhost:${port} -> ${instance}.postgres.database.azure.com:5432'  && sleep 86400"
