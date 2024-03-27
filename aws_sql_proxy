@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+#set -x
+
+while getopts g:i:p: flag
+do
+    case "${flag}" in
+        g) group=${OPTARG};;
+        i) instance=${OPTARG};;
+        p) port=${OPTARG};;
+    esac
+done
+
+if [ -z "$group" ]; then
+    group=eng
+fi
+
+if [ -z "$instance" ]; then
+    echo "Usage: $0 -i <instance_name> [-g <group>] [-p <port>]"
+    echo " "
+    echo "Example: $0 -i aserto-eng"
+    exit 1
+fi
+
+if [ -z "$port" ]; then
+    port=5432
+fi
+
+VAULT_ADDR=https://vault.${group}.aserto.com
+SSH_KEY=$(vault kv get --field sql_proxy_key kv/aws-admin)
+SQL_DOMAIN=$(vault kv get --field sql_domain kv/aws-admin)
+
+eval `ssh-agent`
+ssh-add - <<< "$SSH_KEY"
+ssh ec2-user@sql-proxy.${group}.aserto.com -L ${port}:${instance}.${SQL_DOMAIN}:5432 "echo 'Forwarding localhost:${port} -> ${instance}.${SQL_DOMAIN}:5432'  && sleep 86400"
