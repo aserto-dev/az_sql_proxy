@@ -33,4 +33,4 @@ SQL_DOMAIN=$(vault kv get --field sql_domain kv/aws-admin)
 
 eval `ssh-agent`
 ssh-add - <<< "$SSH_KEY"
-ssh ec2-user@sql-proxy.${group}.aserto.com -L ${port}:${instance}.${SQL_DOMAIN}:5432 "echo 'Forwarding localhost:${port} -> ${instance}.${SQL_DOMAIN}:5432'  && sleep 86400"
+ssh ec2-user@sql-proxy.${group}.aserto.com -o "StrictHostKeyChecking no" -L ${port}:${instance}.${SQL_DOMAIN}:5432 "echo 'Forwarding localhost:${port} -> ${instance}.${SQL_DOMAIN}:5432'  && sleep 86400"
